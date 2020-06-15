@@ -18,7 +18,7 @@ elincr=5
 # 99 = only data between 5 and 30 degree elevation angles
 snrtype=88
 
-rm -rf snr
+# loop over files - extract SNR by azimuth and elevation
 mkdir -p snr
 mkdir -p sp3
 for file in $@
@@ -54,21 +54,18 @@ done
 # get list of unique sites
 ls snr/* |cut -f2 -d/ | awk '{printf("%.4s\n",$1)}' |uniq > siteslist.txt
 
-# convert SNR output to GMT grid files
-rm -rf grd
+# bin SNR output as GMT grid files for each site
 mkdir -p grd
 for site in `cat siteslist.txt`
 do
   echo $site
   ls snr/$site????.snr$snrtype
   cat snr/$site????.snr$snrtype > snr/$site.snr$snrtype
-  echo "awk '{print $3,$2,$7}' snr/$site.snr$snrtype | gmt blockmean -R0/360/0/85 -I$azincr/$elincr |gmt xyz2grd -R0/360/0/85 -I$azincr/$elincr -Ggrd/${site}_S1_$azincr-$elincr.grd"
   awk '{print $3,$2,$7}' snr/$site.snr$snrtype | gmt blockmean -R0/360/0/85 -I$azincr/$elincr |gmt xyz2grd -R0/360/0/85 -I$azincr/$elincr -Ggrd/${site}_S1_$azincr-$elincr.grd
   awk '{print $3,$2,$8}' snr/$site.snr$snrtype | gmt blockmean -R0/360/0/85 -I$azincr/$elincr |gmt xyz2grd -R0/360/0/85 -I$azincr/$elincr -Ggrd/${site}_S2_$azincr-$elincr.grd
 done
 
 # average grid files by elevation
-rm -rf dat
 mkdir -p dat
 for site in `cat siteslist.txt`
 do
@@ -105,8 +102,6 @@ EOF
   gmt psconvert -A -Tg plots/${site}_elevplot.ps
 
 done
-
-
 
 #make skyplots
 rm -f temp1.dat
