@@ -1,1 +1,6 @@
 *.log
+dat/*
+grd/*
+plots/*
+snr/*
+nav/*
