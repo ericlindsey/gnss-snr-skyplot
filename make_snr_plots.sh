@@ -18,11 +18,14 @@ elincr=5
 # 99 = only data between 5 and 30 degree elevation angles
 snrtype=88
 
-rm -rf snr
 mkdir -p snr
 mkdir -p sp3
+# loop over all input rinex files.
 for file in $@
 do
+  # Check if the corresponding SNR file exists already, if not, create it.
+  if [[ ! -f snr/$stem.snr$snrtype ]]; then
+
     base=$(basename $file)
     echo working on $base
     doy=${base:4:3}
@@ -38,7 +41,8 @@ do
     if [[ ! -f $sp3 ]]; then
         echo "expected orbit file $sp3 not found. Downloading from archive:"
         cd sp3
-        ~/gg/com/sh_get_orbits -yr $yr -doy $doy
+        ~/gg/com/sh_get_orbits -yr $yr -doy $doy -makeg no
+        #~/gg/com/sh_get_orbits -orbit igsf -nofit -yr $yr -doy $doy
         cd ..
     fi
     
@@ -48,10 +52,10 @@ do
 
     mv $stem.snr$snrtype snr/
     rm -f $base
-
+  fi
 done
 
-# get list of unique sites
+# get list of unique 4-character site names
 ls snr/* |cut -f2 -d/ | awk '{printf("%.4s\n",$1)}' |uniq > siteslist.txt
 
 # convert SNR output to GMT grid files
