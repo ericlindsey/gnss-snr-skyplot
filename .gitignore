@@ -1,4 +1,7 @@
-*.log
+gmt.history
+gmt.conf
+siteslist.txt
+*.cpt
 dat/*
 grd/*
 plots/*

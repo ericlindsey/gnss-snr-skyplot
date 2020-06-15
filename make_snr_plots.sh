@@ -20,27 +20,32 @@ snrtype=88
 
 rm -rf snr
 mkdir -p snr
-mkdir -p nav
+mkdir -p sp3
 for file in $@
 do
     base=$(basename $file)
-    echo $base
-
+    echo working on $base
     doy=${base:4:3}
     yr=${base:9:2}
-
     stem=$(basename $base .${yr}o)
 
-    navfile=nav/brdc${doy}0.${yr}n
-
-    if [[ ! -f $navfile ]]; then
-        cd nav
-        ~/gg/com/sh_get_nav -yr $yr -doy $doy
+    # get week and day of week from gamit 'doy' program
+    # this requires gamit_globk to be installed (also required for getting the orbits)
+    wk=`doy $yr $doy |awk 'NR==2{print $3}'`
+    dow=`doy $yr $doy |awk 'NR==2{print $7}' | awk -F, '{print $1}'`
+    sp3="sp3/igs${wk}${dow}.sp3"
+    echo $sp3
+    if [[ ! -f $sp3 ]]; then
+        echo "expected orbit file $sp3 not found. Downloading from archive:"
+        cd sp3
+        ~/gg/com/sh_get_orbits -yr $yr -doy $doy
         cd ..
     fi
     
     ln -s $file .
-    ./RinexSNRv2gitHub/RinexSNRv2.e $base $stem.snr$snrtype $navfile $snrtype
+    echo "./gnssSNR/gnssSNR.e $base $stem.snr$snrtype $sp3 $snrtype"
+    ./gnssSNR/gnssSNR.e $base $stem.snr$snrtype $sp3 $snrtype
+
     mv $stem.snr$snrtype snr/
     rm -f $base
 
@@ -57,6 +62,7 @@ do
   echo $site
   ls snr/$site????.snr$snrtype
   cat snr/$site????.snr$snrtype > snr/$site.snr$snrtype
+  echo "awk '{print $3,$2,$7}' snr/$site.snr$snrtype | gmt blockmean -R0/360/0/85 -I$azincr/$elincr |gmt xyz2grd -R0/360/0/85 -I$azincr/$elincr -Ggrd/${site}_S1_$azincr-$elincr.grd"
   awk '{print $3,$2,$7}' snr/$site.snr$snrtype | gmt blockmean -R0/360/0/85 -I$azincr/$elincr |gmt xyz2grd -R0/360/0/85 -I$azincr/$elincr -Ggrd/${site}_S1_$azincr-$elincr.grd
   awk '{print $3,$2,$8}' snr/$site.snr$snrtype | gmt blockmean -R0/360/0/85 -I$azincr/$elincr |gmt xyz2grd -R0/360/0/85 -I$azincr/$elincr -Ggrd/${site}_S2_$azincr-$elincr.grd
 done
