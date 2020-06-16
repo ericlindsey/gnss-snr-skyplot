@@ -1,9 +1,12 @@
 gmt.history
 gmt.conf
 siteslist.txt
+rinex/*
 dat/*
 grd/*
 plots/*
 snr/*
 sp3/*
+ts_grd/*
+timeseries/*
 
