@@ -45,6 +45,7 @@ N	127.5
 EOF
 fi
 
+# loop over files - extract SNR by azimuth and elevation
 mkdir -p snr
 mkdir -p sp3
 # loop over all input rinex files.
@@ -192,7 +193,6 @@ do
     yr=${file:12:2}
     doy=${file:15:3}
     decyr=`doy $yr $doy |awk 'NR==3{print $3}'`
-
 
     #simplistic method: convert to an xyz file, then move each line to the correct timeseries file
     NR=0
