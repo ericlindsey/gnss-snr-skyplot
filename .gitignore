@@ -1,6 +1,8 @@
 gmt.history
 gmt.conf
 siteslist.txt
+snrlist.txt
+temp.dat
 rinex/*
 dat/*
 grd/*
