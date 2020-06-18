@@ -34,32 +34,16 @@ fi
 #ls timeseries/* |cut -f2 -d/ | awk '{printf("%.4s\n",$1)}' |uniq > siteslist.txt
 for site in $@
 do 
-  rm -f timeseries/$site*
-  rm -f snrlist.txt
-  # do one year at a time to avoid files getting out of order. Repeat for years before and after 2000
-  for yr in `seq -w 80 99`
-  do
-    if [[ "`echo snr/$site*.${yr}o.snr$snrtype`" != "snr/$site*.${yr}o.snr$snrtype" ]]; then
-      echo gridding data from $yr
-      ./grid_for_timeseries.sh `ls snr/$site*.${yr}o.snr$snrtype`
-    fi
-  done
-  for yr in `seq -w 0 49`
-  do
-    if [[ "`echo snr/$site*.${yr}o.snr$snrtype`" != "snr/$site*.${yr}o.snr$snrtype" ]]; then
-      echo gridding data from $yr
-      ./grid_for_timeseries.sh `ls snr/$site*.${yr}o.snr$snrtype`
-    fi
-  done
 
   # get bounds and create initial frame
   minmax=`gmt gmtinfo -C timeseries/$site-$obs-*.dat`
   minx=`echo $minmax |awk '{print $1-($2-$1)*0.05}'`
   maxx=`echo $minmax |awk '{print $2+($2-$1)*0.05}'`
-  miny=`echo $minmax |awk '{print $3-($4-$3)*0.05}'`
-  maxy=`echo $minmax |awk '{print $4+($4-$3)*0.05}'`
+  miny=30 #`echo $minmax |awk '{print $3-($4-$3)*0.05}'`
+  maxy=55 #`echo $minmax |awk '{print $4+($4-$3)*0.05}'`
   bounds="-R$minx/$maxx/$miny/$maxy"
   caps_SITE=`echo $site | tr [:lower:] [:upper:]`
+  echo $caps_SITE bounds: $bounds
 
   ayr=`echo $minx $maxx |awk '{if($2-$1>10) {print 2} else {print 1}}'`
   gmt psbasemap -JX6i/3i $bounds -BWSen+t"Site: $caps_SITE" -Bxa${ayr}f0.08333333+l"Time (Yr)" -Bya5f1+l"$obs SNR (dB)" -P -K > plots/${site}_${obs}_timeseries.ps
@@ -67,6 +51,7 @@ do
   # loop over files and plot each line
   for file in `ls timeseries/$site-$obs-*.dat`
   do
+    echo plot $file
     gmt psxy $file -W1p -Ccolors12_custom.cpt -gx0.1 -J -R -O -K >> plots/${site}_${obs}_timeseries.ps
   done
 

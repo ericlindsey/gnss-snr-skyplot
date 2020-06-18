@@ -16,6 +16,8 @@ do
   doy=${base:4:3}
   yr=${base:9:2}
   decyr=`doy $yr $doy |awk 'NR==3{print $3}'`
+   
+  echo $snrfile
 
   # grid data
   awk -v obs=$obs 'obs=="S1" {print $3,$2,$7} obs=="S2" {print $3,$2,$8}' $snrfile |gmt blockmean -r -R0/360/0/85 -I$ts_azincr/$ts_elincr -bo | gmt xyz2grd -bi -r -R0/360/0/85 -I$ts_azincr/$ts_elincr -G$snrfile.$obs.grd
@@ -27,14 +29,34 @@ do
     az=`echo $line |awk '{print $1}'`
     el=`echo $line |awk '{print $2}'`
     val=`echo $line |awk '{print $3}'`
-    # note, values are appended - delete the file manually to start over
-    if [[ ! -f timeseries/$site-$obs-$az-$el.dat ]]; then
-      # add header to the start of the file if it does not exist already
+    tsfile="timeseries/$site-$obs-$az-$el.dat"
+
+    # add header to the start of the file if it does not exist already
+    # NR (mod 12) is the colormap identifier for this timeseries.
+    if [[ ! -f $tsfile ]]; then
       NR12=`echo $NR | awk '{print $1%12}'`
-      echo "> -Z$NR12" > timeseries/$site-$obs-$az-$el.dat
+      echo "> -Z$NR12" > $tsfile
+      echo "zero row"
+      lastyr=0
+    else
+      lastyr=`tail -n1 $tsfile |awk '{print $1}'`
+      if [[ $lastyr == ">" ]]; then
+        #special case if there was only one line in the file, ensure lastyr is a number.
+        echo "first row"
+        lastyr=0
+      fi
     fi
     NR=$(expr $NR + 1)
-    echo $decyr $val >> timeseries/$site-$obs-$az-$el.dat
+
+    # do not add zero values, and ensure this date is not already in the timeseries before adding it.
+    if (( $(echo "$decyr > $lastyr" |bc -l) && $(echo "$val > 0" |bc -l) )); then
+      echo $decyr $val >> timeseries/$site-$obs-$az-$el.dat
+    fi
+
   done < $snrfile.$obs.dat
+
+  rm -f $snrfile.$obs.dat $snrfile.$obs.grd
+
 done
+
 

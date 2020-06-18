@@ -24,7 +24,6 @@ do
 
   # Check if the corresponding SNR file exists already, if not, create it.
   if [[ ! -f $snrfile ]]; then
-
     # get week and day of week from gamit 'doy' program
     # this requires gamit_globk to be installed (also required for getting the orbits)
     wk=`doy $yr $doy |awk 'NR==2{print $3}'`
@@ -37,8 +36,22 @@ do
         ~/gg/com/sh_get_orbits -orbit igsf -nofit -yr $yr -doy $doy
         cd ..
     fi
-    
-    echo "./gnssSNR/gnssSNR.e $file $snrfile $sp3 $snrtype"
-    ./gnssSNR/gnssSNR.e $file $snrfile $sp3 $snrtype
+    # check a second time - might not have found igsf data
+    if [[ ! -f $sp3 ]]; then
+        echo "expected IGSF file $sp3 not found. Downloading IGSR from archive:"
+        cd sp3
+        #~/gg/com/sh_get_orbits -yr $yr -doy $doy -makeg no
+        ~/gg/com/sh_get_orbits -orbit igsr -nofit -yr $yr -doy $doy
+        cd ..
+        sp3=sp3/igr${wk}${dow}.sp3
+    fi
+    # only run if we did find an orbit file
+    if [[ -f $sp3 ]]; then
+        echo "./gnssSNR/gnssSNR.e $file $snrfile $sp3 $snrtype"
+        ./gnssSNR/gnssSNR.e $file $snrfile $sp3 $snrtype
+    else
+        echo "no valid orbit files found. Skipping this day."
+    fi
   fi
 done
+
