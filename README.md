@@ -17,7 +17,7 @@ If you want a better estimate of the noise at a particular site, use more data -
 The choice of S1/S2 observable, binning size for azimuth and elevation are hard-coded in the file params.config. Feel free to change them as you like.
 
 ## Testing and examples
-From the main directory, run ./test_snr_plots.sh. This runs './make_skymaps.sh <site>' where site=at01, so it will create a basic sky plot from the snippet of test data included with the gnssSNR utility.
+From the main directory, run ./test_snr_plots.sh. This runs './make_skymaps.sh site' where site=at01, so it will create a basic sky plot from the snippet of test data included with the gnssSNR utility.
 <img src="at01_S1_skyplot.png" width=400>
 
 This looks pretty sparse because the test data is so short. Use a full day of data, or better yet, up to a month of data to get a good average.
