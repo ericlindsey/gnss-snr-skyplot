@@ -8,6 +8,8 @@ fi
 
 source params.config
 
+mkdir -p plots
+
 # first run gridding commands for each site
 ./grid_last_data.sh $@
 
@@ -21,6 +23,7 @@ do
   awk -v x=$x '{print x,$1,$2}' dat/all_${obs}_elevmean.dat >> temp_elevmean.dat
 done
 gmt xyz2grd temp_elevmean.dat -r -R0/360/0/85 -I$azincr/$elincr -Ggrd/${obs}_elevmean.grd
+rm -f temp_elevmean.dat
 
 #make elevation-angle plots
 gmt gmtset MAP_TICK_LENGTH -5p

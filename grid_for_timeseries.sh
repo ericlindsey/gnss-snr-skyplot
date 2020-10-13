@@ -8,6 +8,8 @@ fi
 
 source params.config
 
+mkdir -p timeseries
+
 for snrfile in $@
 do
   # get site name and decimal year from filename

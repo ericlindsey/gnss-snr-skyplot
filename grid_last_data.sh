@@ -10,6 +10,7 @@ source params.config
 
 # clear the elevation-averaged data
 mkdir -p dat
+mkdir -p grd
 rm -rf dat/*elevmean.dat
 
 # loop over each supplied site name
