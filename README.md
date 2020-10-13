@@ -19,6 +19,7 @@ The choice of S1/S2 observable, binning size for azimuth and elevation are hard-
 ## Testing and examples
 From the main directory, run ./test_snr_plots.sh. This runs './make_skymaps.sh <site>' where site=at01, so it will create a basic sky plot from the snippet of test data included with the gnssSNR utility.
 <img src="at01_S1_skyplot.png" width=400>
+
 This looks pretty sparse because the test data is so short. Use a full day of data, or better yet, up to a month of data to get a good average.
 
 If you don't like the gridding, you can create an ungridded plot to see the SNR values along each individual satellite track. Use ./skymap_single_ungridded.sh for this.
